@@ -5,6 +5,9 @@ interface calculatorInterface {
   screen: HTMLParagraphElement;
   operation: null | string;
   smallText: HTMLParagraphElement;
+  result: boolean;
+  addition(): void;
+  subtraction(): void;
   delete(): void;
   fillSmallText(value: string, operator: string): void;
   addListeners(): void;
@@ -21,6 +24,7 @@ class Calculator implements calculatorInterface {
   ) {}
 
   flag: number = 1;
+  result = false;
   firstValue: string = "";
   secondValue: string = "";
 
@@ -28,67 +32,112 @@ class Calculator implements calculatorInterface {
   display(value: string) {
     this.screen.textContent = this.screen.textContent + value;
   }
-  //reset
+  //reset wszystkich wprowadzonych danych
   reset() {
+    this.result = false;
     this.flag = 1;
     this.firstValue = "";
     this.secondValue = "";
     this.screen.textContent = "";
     this.smallText.textContent = "";
   }
-  //kasowanie danych z ekranu
+  //kasowanie wpisywanych danych
   delete() {
     let lenght = this.screen.textContent.length;
     let newText = this.screen.textContent.slice(0, lenght - 1);
     this.screen.textContent = newText;
+
+    if (this.flag === 1) {
+      this.firstValue = this.firstValue.slice(0, lenght - 1);
+    } else if (this.flag === 2) {
+      this.secondValue = this.secondValue.slice(0, lenght - 1);
+    }
+
     lenght--;
   }
+  //metoda przypisująca dane na podstawie których będą wykonywane operacje liczenia
 
-  fillValues(value: string) {
-    if (this.flag === 1) {
+  fillValues(value: string, flag?: boolean) {
+    console.log(flag);
+    console.log(this.flag);
+    console.log();
+
+    if (this.result) {
+      this.firstValue = value;
+      this.secondValue = "";
+    }
+
+    if (this.flag === 1 && flag) {
       this.firstValue = this.firstValue + value;
-    } else if (this.flag === 2) {
+    }
+//DO PRZEROBIENIA !!
+    if (this.flag === 2 && this.result) {
+      console.log(value);
+      this.secondValue = " ";
+    }
+
+    if (this.flag === 2 && !this.result) {
+      console.log(value);
+
       this.secondValue = this.secondValue + value;
     }
   }
 
   //wyświetlanie danych na małym ekranie
+
   fillSmallText() {
-    console.log(this.firstValue, this.secondValue);
+    console.log(
+      `first value is: ${this.firstValue}, second value is: ${this.secondValue}`
+    );
 
     this.smallText.textContent = `${
       this.firstValue + this.operation + this.secondValue
     }`;
   }
   //metoda odpowiedzialna za dodawanie
-  add() {
-    const result = parseFloat(this.firstValue) + parseFloat(this.secondValue);
+
+  addition() {
+    let result = parseFloat(this.firstValue) + parseFloat(this.secondValue);
     this.screen.textContent = "";
     this.display(result.toFixed(2).toString());
+    this.result = true;
   }
-
+  //metoda odpowiedzialna za odejmowanie
   subtraction() {
-    let val1: number = parseFloat(this.firstValue);
-    let val2: number = parseFloat(this.secondValue);
-
-    let result: number = val1 - val2;
-
-    console.log(result);
-    console.log((1.2 - 1.1).toFixed(2));
-
+    let result: number =
+      parseFloat(this.firstValue) - parseFloat(this.secondValue);
     this.screen.textContent = "";
     this.display(result.toFixed(2).toString());
   }
+
+  multiplication() {
+    let result: number =
+      parseFloat(this.firstValue) * parseFloat(this.secondValue);
+    this.screen.textContent = "";
+    this.display(result.toFixed(2).toString());
+  }
+
+  division() {
+    let result: number =
+      parseFloat(this.firstValue) / parseFloat(this.secondValue);
+    this.screen.textContent = "";
+    this.display(result.toFixed(2).toString());
+  }
+  //metoda która sprawdza jakie działanie ma zostać wykonane po czym wywołuje odpowiednią funkcję
 
   calculate() {
-    console.log(this.operation);
-
     switch (this.operation) {
       case "+":
-        this.add();
+        this.addition();
         break;
       case "-":
         this.subtraction();
+        break;
+      case "*":
+        this.multiplication();
+        break;
+      case "/":
+        this.division();
         break;
     }
   }
@@ -100,7 +149,7 @@ class Calculator implements calculatorInterface {
 
     if (!isNaN(parseIntValue) || value === ".") {
       this.display(value);
-      this.fillValues(value);
+      this.fillValues(value, this.result ? true : false);
     }
 
     switch (value) {
@@ -114,6 +163,7 @@ class Calculator implements calculatorInterface {
 
       case "+":
         this.operation = "+";
+        this.fillValues(this.screen.textContent, true);
         this.fillSmallText();
         this.flag = 2;
         this.screen.textContent = "";
@@ -131,9 +181,24 @@ class Calculator implements calculatorInterface {
         this.flag = 2;
         this.screen.textContent = "";
         break;
+
+      case "*":
+        this.operation = "*";
+        this.fillSmallText();
+        this.flag = 2;
+        this.screen.textContent = "";
+        break;
+
+      case "/":
+        this.operation = "/";
+        this.fillSmallText();
+        this.flag = 2;
+        this.screen.textContent = "";
+        break;
     }
   }
 
+  // metoda która dodaje listenery na przyciski
   addListeners() {
     this.keys.forEach((key) => {
       key.addEventListener("click", (e) => this.handleClick(e));
