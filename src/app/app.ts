@@ -27,6 +27,8 @@ class Calculator implements calculatorInterface {
   result = false;
   firstValue: string = "";
   secondValue: string = "";
+  counter = 0;
+  resultValue = 0;
 
   //metoda odpowiedzialna za wyświetlanie danych na ekranie
   display(value: string) {
@@ -47,10 +49,10 @@ class Calculator implements calculatorInterface {
     let newText = this.screen.textContent.slice(0, lenght - 1);
     this.screen.textContent = newText;
 
-    if (this.flag === 1) {
-      this.firstValue = this.firstValue.slice(0, lenght - 1);
-    } else if (this.flag === 2) {
-      this.secondValue = this.secondValue.slice(0, lenght - 1);
+    this.smallText.textContent = "";
+
+    if (this.result) {
+      this.screen.textContent = this.resultValue.toString();
     }
 
     lenght--;
@@ -58,27 +60,26 @@ class Calculator implements calculatorInterface {
   //metoda przypisująca dane na podstawie których będą wykonywane operacje liczenia
 
   fillValues(value: string, flag?: boolean) {
-    console.log(flag);
-    console.log(this.flag);
-    console.log();
-
     if (this.result) {
-      this.firstValue = value;
+      this.firstValue = this.resultValue.toString();
       this.secondValue = "";
     }
 
     if (this.flag === 1 && flag) {
       this.firstValue = this.firstValue + value;
     }
-//DO PRZEROBIENIA !!
+    //DO PRZEROBIENIA !!
     if (this.flag === 2 && this.result) {
-      console.log(value);
-      this.secondValue = " ";
+      if (this.counter === 0) {
+        this.secondValue = "";
+        this.counter = 1;
+      } else {
+        this.secondValue = value;
+        this.counter = 0;
+      }
     }
 
     if (this.flag === 2 && !this.result) {
-      console.log(value);
-
       this.secondValue = this.secondValue + value;
     }
   }
@@ -97,31 +98,35 @@ class Calculator implements calculatorInterface {
   //metoda odpowiedzialna za dodawanie
 
   addition() {
-    let result = parseFloat(this.firstValue) + parseFloat(this.secondValue);
+    this.resultValue =
+      parseFloat(this.firstValue) + parseFloat(this.secondValue);
     this.screen.textContent = "";
-    this.display(result.toFixed(2).toString());
+    this.display(this.resultValue.toString());
     this.result = true;
   }
   //metoda odpowiedzialna za odejmowanie
   subtraction() {
-    let result: number =
+    this.resultValue =
       parseFloat(this.firstValue) - parseFloat(this.secondValue);
     this.screen.textContent = "";
-    this.display(result.toFixed(2).toString());
+    this.display(this.resultValue.toString());
+    this.result = true;
   }
 
   multiplication() {
-    let result: number =
+    this.resultValue =
       parseFloat(this.firstValue) * parseFloat(this.secondValue);
     this.screen.textContent = "";
-    this.display(result.toFixed(2).toString());
+    this.display(this.resultValue.toString());
+    this.result = true;
   }
 
   division() {
-    let result: number =
+    this.resultValue =
       parseFloat(this.firstValue) / parseFloat(this.secondValue);
     this.screen.textContent = "";
-    this.display(result.toFixed(2).toString());
+    this.display(this.resultValue.toString());
+    this.result = true;
   }
   //metoda która sprawdza jakie działanie ma zostać wykonane po czym wywołuje odpowiednią funkcję
 
@@ -177,6 +182,7 @@ class Calculator implements calculatorInterface {
 
       case "-":
         this.operation = "-";
+        this.fillValues(this.screen.textContent, true);
         this.fillSmallText();
         this.flag = 2;
         this.screen.textContent = "";
@@ -184,6 +190,7 @@ class Calculator implements calculatorInterface {
 
       case "*":
         this.operation = "*";
+        this.fillValues(this.screen.textContent, true);
         this.fillSmallText();
         this.flag = 2;
         this.screen.textContent = "";
@@ -191,6 +198,7 @@ class Calculator implements calculatorInterface {
 
       case "/":
         this.operation = "/";
+        this.fillValues(this.screen.textContent, true);
         this.fillSmallText();
         this.flag = 2;
         this.screen.textContent = "";
